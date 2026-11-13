@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <sys/stat.h>
 #include <tamtypes.h>
+#include <gs_psm.h>
 #include <libcdvd.h>
 #include <libcdvd-common.h>
 #include <graph.h>
@@ -179,16 +180,21 @@ int main(int argc, char *argv[])
     qword_t *q;
     int running = 1;
     int last_buttons = 0;
+    int fbp;
 
-    graph_initialize(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0);
+    fbp = graph_vram_allocate(SCREEN_WIDTH, SCREEN_HEIGHT, GS_PSM_32, GRAPH_ALIGN_PAGE);
+    graph_initialize(fbp, SCREEN_WIDTH, SCREEN_HEIGHT, GS_PSM_32, 0, 0);
     graph_enable_output();
     graph_set_bgcolor(20, 30, 50);
 
     memset(&framebuffer, 0, sizeof(framebuffer));
-    framebuffer.address = 0;
+    framebuffer.address = fbp;
     framebuffer.width = SCREEN_WIDTH;
     framebuffer.height = SCREEN_HEIGHT;
-    framebuffer.psm = 0;
+    framebuffer.psm = GS_PSM_32;
+    framebuffer.mask = 0;
+
+    graph_set_framebuffer(0, fbp, SCREEN_WIDTH, GS_PSM_32, 0, 0);
 
     memset(&zbuffer, 0, sizeof(zbuffer));
     zbuffer.enable = 0;
