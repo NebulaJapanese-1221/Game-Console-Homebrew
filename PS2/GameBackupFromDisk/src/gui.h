@@ -27,6 +27,7 @@ extern int gui_state;
 extern int gui_selected;
 extern int gui_backup_options;
 extern char gui_save_path[256];
+extern char gui_game_id[32];
 extern disc_info_t gui_disc_info;
 
 void gui_init(void);

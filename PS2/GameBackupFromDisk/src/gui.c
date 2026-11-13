@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include "gui.h"
 #include "input.h"
+#include <gs_psm.h>
 
 static framebuffer_t framebuffer;
 static zbuffer_t zbuffer;
@@ -14,6 +15,7 @@ int gui_state = STATE_MENU;
 int gui_selected = 0;
 int gui_backup_options = BACKUP_OPT_MD5 | BACKUP_OPT_CUE;
 char gui_save_path[256] = "mass:/DVD";
+char gui_game_id[32] = {0};
 disc_info_t gui_disc_info;
 
 static char file_browser_path[256] = "mass:/";
@@ -190,6 +192,9 @@ void gui_render(qword_t *q)
         draw_string(20, 220, "Estimated Sectors:", 200, 200, 200, &q);
         draw_string(130, 220, sect_buf, 255, 255, 255, &q);
 
+        draw_string(20, 250, "Game ID:", 200, 200, 200, &q);
+        draw_string(130, 250, gui_game_id[0] ? gui_game_id : "GAMEBACKUP", 255, 255, 0, &q);
+
         draw_string(20, 390, "CROSS: Continue Backup  CIRCLE: Back", 150, 150, 150, &q);
     }
     else if (gui_state == STATE_BACKUP) {
@@ -286,6 +291,7 @@ void gui_main_menu_input(int pressed)
     }
     if (pressed & PAD_CROSS) {
         if (gui_selected == 0) {
+            backup_read_game_id(gui_game_id, sizeof(gui_game_id));
             gui_state = STATE_DISC_INFO;
         } else if (gui_selected == 1) {
             gui_state = STATE_FILE_BROWSER;

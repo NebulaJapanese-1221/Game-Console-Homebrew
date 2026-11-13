@@ -23,20 +23,27 @@ CFLAGS += -I$(PACKAGES)/graph/include
 CFLAGS += -I$(PACKAGES)/graph/include/../../dma/include
 CFLAGS += -I$(PACKAGES)/graph/include/../../packet/include
 CFLAGS += -I$(PACKAGES)/draw/include
+CFLAGS += -I$(PACKAGES)/math3d/include
 CFLAGS += -I$(PACKAGES)/font/include
 CFLAGS += -I$(PACKAGES)/pad/include
 
 LDFLAGS  = -O2 -Wl,--gc-sections -Wl,-zmax-page-size=128 -nostartfiles
+LDFLAGS += -L$(PACKAGES)/math3d/lib
 LDFLAGS += -L$(PACKAGES)/startup/ee/lib
 LDFLAGS += -L$(PACKAGES)/graph/lib
 LDFLAGS += -L$(PACKAGES)/draw/lib
 LDFLAGS += -L$(PACKAGES)/font/lib
 LDFLAGS += -L$(PACKAGES)/pad/lib
 LDFLAGS += -L$(PACKAGES)/cdvd/lib
+LDFLAGS += -L$(PACKAGES)/pthreadglue/lib
+LDFLAGS += -L$(PACKAGES)/cglue/lib
+LDFLAGS += -L$(PACKAGES)/kernel/lib
+LDFLAGS += -L$(PACKAGES)/profglue/lib
+LDFLAGS += -L$(TOOLCHAIN)/lib
 LDFLAGS += -Wl,--start-group
-LDFLAGS += -lgraph -ldraw -lfont -lpad
+LDFLAGS += -lgraph -ldraw -lfont -lpad -lmath3d
 LDFLAGS += -Wl,--end-group
-LDLIBS   = -lstartup -lcdvd
+LDLIBS   = -lstartup -lcdvd -lpthreadglue -lcglue -lkernel -lprofglue
 
 LINKFILE = $(PACKAGES)/startup/share/ee/linkfile
 

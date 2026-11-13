@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <tamtypes.h>
 #include <libcdvd.h>
 #include <libcdvd-common.h>
@@ -8,6 +9,7 @@
 #include "input.h"
 
 static char game_id[32] = {0};
+static char out_path[256] = {0};
 
 static int read_game_id(void)
 {
@@ -48,24 +50,18 @@ static int read_game_id(void)
     return 0;
 }
 
-static char out_path[256] = {0};
-
 static void build_out_path(void)
 {
     const char *ext = gui_disc_info.ext;
     const char *folder = gui_disc_info.folder;
 
-    /* Use save path from file browser if user selected a file, otherwise use folder */
     char base[256];
-    if (strstr(gui_save_path, ".iso") || strstr(gui_save_path, ".bin")) {
-        /* User selected a specific file path */
-        strncpy(out_path, gui_save_path, sizeof(out_path) - 1);
-    } else {
-        snprintf(base, sizeof(base), "mass:/%s", folder);
-        mkdir(base, 0777);
-        snprintf(out_path, sizeof(out_path), "mass:/%s/%s%s",
-                 folder, game_id[0] ? game_id : "GAMEBACKUP", ext);
-    }
+    snprintf(base, sizeof(base), "mass:/%s", folder);
+    mkdir(base, 0777);
+
+    const char *name = (game_id[0] != '\0') ? game_id : "GAMEBACKUP";
+    snprintf(out_path, sizeof(out_path), "mass:/%s/%s%s",
+             folder, name, ext);
 }
 
 int main(int argc, char *argv[])
@@ -98,9 +94,9 @@ int main(int argc, char *argv[])
         else if (gui_state == STATE_BACKUP) {
             static int backup_started = 0;
             if (!backup_started) {
+                read_game_id();
                 build_out_path();
                 int options = gui_backup_options;
-                /* Force CUE for PS1 CDs */
                 if (gui_disc_info.media_type == DISC_TYPE_PS1_CD) {
                     options |= BACKUP_OPT_CUE;
                 }
@@ -116,14 +112,13 @@ int main(int argc, char *argv[])
                     int st = backup_status();
                     backup_started = 0;
                     if (st == BACKUP_STATUS_DONE) {
-                        /* Write sidecar files */
                         if (g_backup.options & BACKUP_OPT_MD5) {
                             backup_write_md5(out_path);
                         }
                         if (g_backup.options & BACKUP_OPT_CUE) {
                             backup_write_cue(out_path, g_backup.sector);
                         }
-                        if (g_backup.options & BACKUP_OPT_PATCH) {
+                        if (g_backup.options & BACKUP_OPT_PATCH_CNF) {
                             backup_patch_system_cnf("mass:/CD", game_id);
                         }
                         gui_state = STATE_COMPLETE;

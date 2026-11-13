@@ -8,6 +8,7 @@ targets:
       - src/gui.c
       - src/backup.c
       - src/input.c
+      - src/md5.c
     headers:
       - cdvd
       - graph
@@ -20,8 +21,19 @@ targets:
       - -L/home/nebulagamr/.local/share/ps2build/packages/core/draw/lib
       - -L/home/nebulagamr/.local/share/ps2build/packages/core/font/lib
       - -L/home/nebulagamr/.local/share/ps2build/packages/core/pad/lib
+      - -L/home/nebulagamr/.local/share/ps2build/packages/core/math3d/lib
+      - -L/home/nebulagamr/.local/share/ps2build/packages/core/pthreadglue/lib
+      - -L/home/nebulagamr/.local/share/ps2build/packages/core/cglue/lib
+      - -L/home/nebulagamr/.local/share/ps2build/packages/core/kernel/lib
+      - -L/home/nebulagamr/.local/share/ps2build/packages/core/profglue/lib
+      - -L/home/nebulagamr/.local/share/ps2build/toolchain/ee/lib
       - -lgraph
       - -ldraw
       - -lfont
       - -lpad
+      - -lmath3d
+      - -lpthreadglue
+      - -lcglue
+      - -lkernel
+      - -lprofglue
       - -Wl,--end-group

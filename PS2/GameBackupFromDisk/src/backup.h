@@ -60,6 +60,7 @@ typedef struct {
 extern backup_ctx_t g_backup;
 
 int backup_detect_disc(disc_info_t *info);
+int backup_read_game_id(char *out, int max_len);
 int backup_get_disc_type_name(int type, char *buf, int buf_len);
 int backup_init(const char *out_path, int options, const disc_info_t *disc,
                 const char *game_id);

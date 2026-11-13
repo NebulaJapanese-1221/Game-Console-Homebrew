@@ -23,7 +23,7 @@ static const struct {
     int   size;
     const char *ext;
     const char *folder;
-} disc_profiles[] = {
+} disc_profiles[] __attribute__((unused)) = {
     { DISC_TYPE_PS1_CD,      2352, ".bin", "CD" },
     { DISC_TYPE_PS2_CD,      2352, ".bin", "CD" },
     { DISC_TYPE_PS2_DVD,     2048, ".iso", "DVD" },
@@ -83,6 +83,47 @@ static int read_sectors_until_error(u32 *out_sectors)
     }
 
     *out_sectors = sector;
+    return 0;
+}
+
+int backup_read_game_id(char *out, int max_len)
+{
+    if (out == NULL || max_len <= 0) return 0;
+    out[0] = '\0';
+
+    sceCdlFILE sf;
+    if (sceCdSearchFile(&sf, "\\SYSTEM.CNF;1") != 1) return 0;
+    static u8 buf[2048] __attribute__((aligned(64)));
+    static sceCdRMode mode;
+    mode.trycount = 20;
+    mode.spindlctrl = SCECdSpinNom;
+    mode.datapattern = SCECdSecS2048;
+    mode.pad = 0;
+    if (sceCdRead(sf.lsn, (sf.size + 2047) / 2048, buf, &mode) != 1) return 0;
+    if (sceCdSync(0) != 0) return 0;
+    const char *ptr = (const char *)buf;
+    const char *end = ptr + sf.size;
+    while (ptr < end) {
+        if (strncmp(ptr, "BOOT2", 5) == 0) {
+            while (ptr < end && *ptr != '=') ptr++;
+            if (ptr >= end) return 0;
+            ptr++;
+            while (ptr < end && (*ptr == ' ' || *ptr == '\t')) ptr++;
+            while (ptr < end && *ptr != '\\' && *ptr != ':') ptr++;
+            if (ptr >= end) return 0;
+            if (*ptr == '\\') ptr++;
+            const char *start = ptr;
+            while (ptr < end && *ptr != ';' && *ptr != '\r' && *ptr != '\n' && *ptr != ' ') ptr++;
+            int len = (int)(ptr - start);
+            if (len > 0 && len < max_len) {
+                memcpy(out, start, (size_t)len);
+                out[len] = '\0';
+            }
+            return 1;
+        }
+        while (ptr < end && *ptr != '\n') ptr++;
+        if (ptr < end) ptr++;
+    }
     return 0;
 }
 
@@ -388,8 +429,8 @@ int backup_create_vmc_header(const char *out_path, u32 data_size)
     u32 total_clusters = (data_size + cluster_size - 1) / cluster_size;
     if (total_clusters < 4) total_clusters = 4;
 
-    static u8 header[cluster_size] __attribute__((aligned(64)));
-    memset(header, 0, cluster_size);
+    static u8 header[16384] __attribute__((aligned(64)));
+    memset(header, 0, sizeof(header));
 
     /* VMC magic */
     header[0] = 'M';
