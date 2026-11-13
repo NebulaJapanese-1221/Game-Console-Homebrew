@@ -1,0 +1,24 @@
+project: GameBackupFromDisk
+
+targets:
+  - name: GameBackupFromDisk
+    type: ee
+    sources:
+      - src/main.c
+    headers:
+      - cdvd
+      - graph
+      - draw
+      - font
+      - pad
+    ldflags:
+      - -Wl,--start-group
+      - -L/home/nebulagamr/.local/share/ps2build/packages/core/graph/lib
+      - -L/home/nebulagamr/.local/share/ps2build/packages/core/draw/lib
+      - -L/home/nebulagamr/.local/share/ps2build/packages/core/font/lib
+      - -L/home/nebulagamr/.local/share/ps2build/packages/core/pad/lib
+      - -lgraph
+      - -ldraw
+      - -lfont
+      - -lpad
+      - -Wl,--end-group
