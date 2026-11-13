@@ -5,6 +5,9 @@ targets:
     type: ee
     sources:
       - src/main.c
+      - src/gui.c
+      - src/backup.c
+      - src/input.c
     headers:
       - cdvd
       - graph
